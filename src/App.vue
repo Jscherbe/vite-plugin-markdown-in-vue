@@ -10,11 +10,14 @@
       - This is working
       - This is a bullet
 
+      This is a paragraph with a [link in it](https://www.google.com) and some text
+      after it too. Maybe another sentence.
+
       <TestComponent/>
     </MarkdownBlock>
     <h2>
       <MarkdownInline>
-        This title has **Wow**
+        This title has *Wow*
       </MarkdownInline>
     </h2>
     <TestComponent/>
