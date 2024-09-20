@@ -11,6 +11,8 @@ Plugin for the Vite that enables you to use Markdown directly within your Vue co
 
 ## Usage
 
+This plugin provides two placeholder components "MarkdownBlock" and "MarkdownInline". Markdown placed within the component start/end tags will be replaced with HTML.
+
 ```vue
 <template>
   <div>
@@ -36,6 +38,10 @@ Plugin for the Vite that enables you to use Markdown directly within your Vue co
   </div>
 </template>
 ```
+
+The components "MarkdownBlock" and "MarkdownInline" are not actual Vue components, they are replaced with HTML by this plugin before Vue transforms the single file component (ie .vue file).
+
+Note, indentation will be trimmed off all markdown lines before passing to markdown render (unless customParser). This should only be an issue if you are relying on whitespace (ie. pre) or something, you can implement your own parser to adjust how this works. Custom parser is passed the original string with indentation.
 
 ## Vite Setup
 
@@ -70,13 +76,15 @@ const defaults = {
   },
   /**
    * Provide custom markdown parser (gets string, return string)
+   * @example 
+   *   const customParser = (content, ctx) => someMarkdownLibrary(content)
    */
   customParser: null,
   /**
    * Provide custom markdown parser for inline (gets string and ctx, return string)
    */
   customParserInline: null
-}
+};
 ```
 
 ## Bugs, Issues and Changelog

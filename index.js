@@ -10,6 +10,8 @@ const defaults = {
   },
   /**
    * Provide custom markdown parser (gets string, return string)
+   * @example 
+   *   const customParser = (content, ctx) => someMarkdownLibrary(content)
    */
   customParser: null,
   /**
