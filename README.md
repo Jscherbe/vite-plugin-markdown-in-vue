@@ -1,11 +1,16 @@
 # @ulu/vite-plugin-markdown-in-vue
 
-Plugin for the Vite that enables you to use Markdown directly within your Vue component templates. It pre-processes the markdown to html so markdown rendering is not needed in your browser/application.
+This Vite plugin lets you write Markdown directly within Vue components or other files. It pre-processes the Markdown into HTML during the build process, removing the need for browser-side rendering.
+
+In addition to Vue files it also supports ".md" files (ie. if using something like [unplugin-vue-markdown]((https://github.com/unplugin/unplugin-vue-markdown))), see Advanced Setup Example. Technically this could be used by any source file that you bundle with vite, you would just need to add the extensions to options.include. Currently only ".vue" and ".md" files have been tested.
+
+While primarily designed for .vue and .md files, this plugin can potentially work with any file type bundled by Vite. Simply add the desired extensions to the options.include configuration.
 
 ## Table of Contents
 
 - [Usage](#usage)
 - [Vite Setup](#vite-setup)
+  - [Advanced Setup Example](#advanced-setup-example)
 - [Options](#options)
 - [Bugs, Issues and Changelog](#bugs-issues-and-changelog)
 
@@ -34,7 +39,15 @@ This plugin provides two placeholder components "MarkdownBlock" and "MarkdownInl
         This title has *Wow*
       </MarkdownInline>
     </h2>
-    <TestComponent/>
+    <SomeComponent>
+      <template #slotName>
+        <MarkdownBlock>
+          ## Hello
+
+          - This is working
+          - This is a bullet
+      </template>
+    </SomeComponent>
   </div>
 </template>
 ```
@@ -61,16 +74,63 @@ export default defineConfig({
 })
 ```
 
+### Advanced Setup Example
+
+Example with changing the element names to "MdBlock" and "MdInline" and using [unplugin-vue-markdown](https://github.com/unplugin/unplugin-vue-markdown). Note this plugin would only be used for transforming markdown used within custom components or html within the markdown files, the normal markdown (not nested in components, etc) will be transformed after by the unplugin-vue-markdown when it transforms it into the final vue component.
+
+```js
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
+
+import markdownInVue from "@ulu/vite-plugin-markdown-in-vue";
+import markdown from "unplugin-vue-markdown/vite";
+
+export default defineConfig({
+  plugins: [
+    markdownInVue({
+      elementNameBlock: "MdBlock",
+      elementNameInline: "MdInline"
+    }),
+    // This has to be included after markdownInVue! 
+    markdown(),
+    vue({
+      include: [/\.vue$/, /\.md$/]
+    }),
+  ],
+})
+```
+
 ## Options
 
-Code below show's defaults until they're documented
+Code below show's defaults until they're documented, setting these in the options object passed to the plugin will override them
 
 ```js
 const defaults = {
+  /**
+   * Define custom element name ie <MdBlock>
+   */
+  elementNameBlock: "MarkdownBlock",
+  /**
+   * Define custom element name ie <MdInline>
+   */
+  elementNameInline: "MarkdownInline",
+  /**
+   * What file types to include (regex)
+   */
   include: /\.(vue|md)$/,
+  /**
+   * What file types to exclude (regex)
+   */
+  exclude: null,
+  /**
+   * Options to pass to markdown-it
+   */
   markdownItOptions: {
     html: true
   },
+  /**
+   * Alter markdown-it instance (add plugins, etc)
+   */
   markdownItSetup(md) {
     // md.use(something)
   },
@@ -84,7 +144,7 @@ const defaults = {
    * Provide custom markdown parser for inline (gets string and ctx, return string)
    */
   customParserInline: null
-};
+}
 ```
 
 ## Bugs, Issues and Changelog

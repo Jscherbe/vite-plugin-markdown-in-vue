@@ -1,40 +1,33 @@
 import markdownIt from "markdown-it";
+import defaults from "./defaults.js";
 
-const defaults = {
-  include: /\.(vue|md)$/,
-  exclude: null,
-  markdownItOptions: {
-    html: true
-  },
-  markdownItSetup(md) {
-    // md.use(something)
-  },
-  /**
-   * Provide custom markdown parser (gets string, return string)
-   * @example 
-   *   const customParser = (content, ctx) => someMarkdownLibrary(content)
-   */
-  customParser: null,
-  /**
-   * Provide custom markdown parser for inline (gets string and ctx, return string)
-   */
-  customParserInline: null
-};
-
+/**
+ * 
+ * @param {Object} options Plugin options, see defaults for options
+ * @returns 
+ */
 export default function pluginMarkdownInVue(options) {
   const config = Object.assign({}, defaults, options);
   const md = markdownIt(config.markdownItOptions);
-  
+  const regex = {
+    unclosedHtmlComment: /<!--(?![\s\S]*-->)/gm,
+    emptyLines         : /^\s*\n/g,
+    markdownBlock      : newTagRegex(config.elementNameBlock),
+    markdownInline     : newTagRegex(config.elementNameInline),
+  };
+  const shared = { config, md, regex };
+
   if (config.markdownItSetup) {
     config.markdownItSetup(md);
   }
   
   return {
     name: "pluginMarkdownInVue",
+    enforce: "pre",
     transform(code, id) {
       const included = config.include.test(id);
       const excluded = config.exclude ? config.exclude.test(id) : false;
-      const ctx = { code, id, config, md };
+      const ctx = { code, id, ...shared };
       return included && !excluded ? parseCode(ctx) : code;
     },
   }
@@ -45,17 +38,22 @@ export default function pluginMarkdownInVue(options) {
  * and transforming them (find/parse/replace), then returning the module
  */
 function parseCode(ctx) {
-  const { code, config, md, id } = ctx;
-  const regex = {
-    htmlComment: /<!--([^-->]*?)-->/gm,
-    unclosedHtmlComment: /<!--(?![\s\S]*-->)/gm,
-    markdownBlock: /<MarkdownBlock>([\s\S]*?)<\/MarkdownBlock>/gm,
-    markdownInline: /<MarkdownInline>([\s\S]*?)<\/MarkdownInline>/gm,
-    // templateBlock: /<template>([\s\S]*?)<\/template>/gm, // Will not work for nesting
-    emptyLines: /^\s*\n/g,
-  };
+  const { 
+    code, 
+    config, 
+    md, 
+    id,
+    regex
+  } = ctx;
 
+  // Ensure this needs to be transformed before doing any work in file
+  const hasBlock = code.match(regex.markdownBlock);
+  const hasInline = code.match(regex.markdownInline);
   
+  // Exit if none
+  if (!hasBlock && !hasInline) {
+    return code;
+  }
 
   const correctIndent = (content) => {
     const clean = content.replace(regex.emptyLines, "");
@@ -71,6 +69,7 @@ function parseCode(ctx) {
       }
     }
   };
+
   const parseBlock = newParser("render", config.customParser);
   const parseInline = newParser("renderInline", config.customParser);
   
@@ -82,34 +81,38 @@ function parseCode(ctx) {
       return parser(body);
     }
   };
-
-  // Ensure this needs to be transformed before doing any work in file
-  const hasBlock = code.match(regex.markdownBlock);
-  const hasInline = code.match(regex.markdownInline);
-
-  // Exit if none
-  if (!hasBlock && !hasInline) {
-    return code;
+  
+  const transform = (content) => {
+    return content
+      .replace(regex.markdownBlock, replacer(parseBlock))
+      .replace(regex.markdownInline, replacer(parseInline));
   }
 
-  const indices = getTemplateIndices(code, regex);
+  if (id.match(config.isVueSfc)) {
+    const indices = getTemplateIndices(code, regex);
 
-  if (!indices) {
-    console.error("Unable to preprocess markdown in vue:", id);
-    return code;
-  };
-  const templateCode = code.substring(indices.startLast, indices.end);
-  const transformed = templateCode
-    .replace(regex.markdownBlock, replacer(parseBlock))
-    .replace(regex.markdownInline, replacer(parseInline));
+    if (!indices) {
+      console.error("Unable to preprocess markdown in vue:", id);
+      return code;
+    };
 
-  const before = code.substring(0, indices.startLast);
-  const after = code.substring(indices.end)
-
-  // Put the original file back together with the new content
-  return before + transformed + after;
+    const templateCode = code.substring(indices.startLast, indices.end);
+    const transformed = transform(templateCode);
+    const before = code.substring(0, indices.startLast);
+    const after = code.substring(indices.end)
+  
+    // Put the original file back together with the new content
+    return before + transformed + after;
+  // For non vue file replace anywhere
+  } else {
+    return transform(code);
+  }
 }
 
+/**
+ * Trims the indent off the markdown so it's as if it was not indented
+ * since it's inside components (indented)
+ */
 function trimToMinimumIndent(text) {
   const lines = text.split('\n');
   let minIndent = Infinity;
@@ -165,4 +168,12 @@ function getTemplateIndices(code, regex) {
     end: endIndex,
     endLast: endIndex + 10
   };
+}
+
+/**
+ * Create regex object with dynamic tag name (ie for <MarkdownBlock>, <MdBlock> etc)
+ * @return {RegExp} 
+ */
+function newTagRegex(name) {
+  return new RegExp(`<${ name }>([\\s\\S]*?)</${ name }>`, "gm");
 }

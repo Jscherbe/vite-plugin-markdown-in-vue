@@ -1,7 +1,7 @@
 {
   "name": "@ulu/vite-plugin-markdown-in-vue",
-  "description": "Plugin for the Vite build tool that enables you to use Markdown directly within your Vue component templates. It pre-processes the markdown so markdown rendering is not needed in the browser/application",
-  "version": "0.0.4",
+  "description": "This Vite plugin lets you write Markdown directly within Vue components or other files. It pre-processes the Markdown into HTML during the build process, removing the need for browser-side rendering",
+  "version": "0.0.5",
   "type": "module",
   "main": "index.js",
   "repository": {
@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.5.1",
+    "unplugin-vue-markdown": "^0.26.2",
     "vite": "^5.0.5",
     "vue": "^3.3.10"
   }

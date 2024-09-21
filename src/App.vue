@@ -52,11 +52,25 @@
     <p>
       <MarkdownInline>This title has *Wow*</MarkdownInline>
     </p>
+    <h2>Using custom element name test</h2>
+    <MdBlock>
+      ## Hello
+
+      - This is working
+      - This is a bullet
+    </MdBlock>
+    <p>
+      <MdInline>
+        This *is* inline
+      </MdInline>
+    </p>
+    <h2>Test in Markdown File</h2>
+    <TestInMarkdown/>
   </div>
 </template>
 
 <script setup>
   import TestComponent from "./TestComponent.vue";
   import TestInSlot from "./TestInSlot.vue";
-  console.log("Hello World");
+  import TestInMarkdown from "./TestInMarkdown.md";
 </script>
