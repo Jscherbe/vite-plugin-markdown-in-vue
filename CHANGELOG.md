@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.0.6
+
+- Add options for adding optional wrapper elements around output html (rendered markdown). New options include wrapBlock, wrapInline, wrapBlockClasses, wrapInlineClasses. Wrapper is not used when implementing customParser or customParserInline
+
 ## 0.0.5
 
 - Make option for elementNameBlock, elementNameInline so user can choose what the xml/component like name is. For example using the shorter `<MdBlock>` for example.

@@ -31,6 +31,22 @@ export default {
     // md.use(something)
   },
   /**
+   * Wrap content in <div>, only if default parser
+   */
+  wrapBlock: false,
+  /**
+   * Wrap content in <span>, only if default parser
+   */
+  wrapInline: false,
+  /**
+   * Class to add to block wrapper
+   */
+  wrapBlockClasses: "markdown-block",
+  /**
+   * Class to add to inline wrapper
+   */
+  wrapInlineClasses: "markdown-inline",
+  /**
    * Provide custom markdown parser (gets string, return string)
    * @example 
    *   const customParser = (content, ctx) => someMarkdownLibrary(content)

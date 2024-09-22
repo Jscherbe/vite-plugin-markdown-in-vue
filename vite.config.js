@@ -10,7 +10,10 @@ export default defineConfig({
     MarkdownInVue(),
     MarkdownInVue({
       elementNameBlock: "MdBlock",
-      elementNameInline: "MdInline"
+      elementNameInline: "MdInline",
+      wrapBlock: true,
+      wrapInline: true,
+      wrapBlockClasses: "wysiwyg"
     }),
     Markdown(),
     vue({

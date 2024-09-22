@@ -135,6 +135,22 @@ const defaults = {
     // md.use(something)
   },
   /**
+   * Wrap content in <div>, only if default parser
+   */
+  wrapBlock: false,
+  /**
+   * Wrap content in <span>, only if default parser
+   */
+  wrapInline: false,
+  /**
+   * Class to add to block wrapper
+   */
+  wrapBlockClasses: "markdown-block",
+  /**
+   * Class to add to inline wrapper
+   */
+  wrapInlineClasses: "markdown-inline",
+  /**
    * Provide custom markdown parser (gets string, return string)
    * @example 
    *   const customParser = (content, ctx) => someMarkdownLibrary(content)
@@ -143,7 +159,13 @@ const defaults = {
   /**
    * Provide custom markdown parser for inline (gets string and ctx, return string)
    */
-  customParserInline: null
+  customParserInline: null,
+  /**
+   * Vue files will pull <MarkdownBlock>'s only from within <template>
+   * for all other extensions it will parse the whole file and replace the blocks
+   * - This is matched against the file/id in vite
+   */
+  isVueSfc: /\.vue$/,
 }
 ```
 

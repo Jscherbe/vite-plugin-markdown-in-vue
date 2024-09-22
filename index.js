@@ -60,18 +60,31 @@ function parseCode(ctx) {
     return trimToMinimumIndent(clean);
   };
 
-  const newParser = (method, custom) => {
+  const condWrap = (html, inline) => {
+    const should = (inline && config.wrapInline) || (!inline && config.wrapBlock);
+    const tag = inline ? "span" : "div";
+    if (should) {
+      const classes = inline ? config.wrapInlineClasses : config.wrapBlockClasses;
+      return `<${ tag } class="${ classes }">${ html }</${ tag }>`;
+    } else {
+      return html;
+    } 
+  };
+
+  const newParser = (custom, inline) => {
     return (content) => {
       if (custom) {
         return custom(content, ctx);
       } else {
-        return md[method](correctIndent(content));
+        const method = inline ? "renderInline" : "render";
+        const html = md[method](correctIndent(content));
+        return condWrap(html, inline);
       }
     }
   };
 
-  const parseBlock = newParser("render", config.customParser);
-  const parseInline = newParser("renderInline", config.customParser);
+  const parseBlock = newParser(config.customParser);
+  const parseInline = newParser(config.customParserInline, true);
   
   const replacer = (parser) => {
     return (match, body, index, full) => {

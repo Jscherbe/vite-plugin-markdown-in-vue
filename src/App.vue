@@ -61,7 +61,7 @@
     </MdBlock>
     <p>
       <MdInline>
-        This *is* inline
+        This *is* inline ok
       </MdInline>
     </p>
     <h2>Test in Markdown File</h2>
