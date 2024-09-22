@@ -2,7 +2,7 @@
 
 ## 0.0.5
 
-- Make option for elementNameBlock, elementNameInline so user can choose what the xml/component like name is. For example using the shorter "<MdBlock>" for example.
+- Make option for elementNameBlock, elementNameInline so user can choose what the xml/component like name is. For example using the shorter `<MdBlock>` for example.
 - Test this with use inside a markdown file (only used within components), using ["unplugin-vue-markdown/vite"](https://github.com/unplugin/unplugin-vue-markdown)
 
 ## 0.0.4 
