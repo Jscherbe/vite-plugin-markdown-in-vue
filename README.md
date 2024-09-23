@@ -46,6 +46,7 @@ This plugin provides two placeholder components "MarkdownBlock" and "MarkdownInl
 
           - This is working
           - This is a bullet
+        </MarkdownBlock>
       </template>
     </SomeComponent>
   </div>

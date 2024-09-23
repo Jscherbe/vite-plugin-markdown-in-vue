@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.0.7
+
+- Readme change
+
 ## 0.0.6
 
 - Add options for adding optional wrapper elements around output html (rendered markdown). New options include wrapBlock, wrapInline, wrapBlockClasses, wrapInlineClasses. Wrapper is not used when implementing customParser or customParserInline
