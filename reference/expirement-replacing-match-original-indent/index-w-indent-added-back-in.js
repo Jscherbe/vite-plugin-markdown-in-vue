@@ -45,6 +45,8 @@ function parseCode(ctx) {
     id,
     regex
   } = ctx;
+  const isTest = config.debug && id.includes("TestInMarkdown.md");
+
 
   // Ensure this needs to be transformed before doing any work in file
   const hasBlock = code.match(regex.markdownBlock);
@@ -57,7 +59,8 @@ function parseCode(ctx) {
 
   const correctIndent = (content) => {
     const clean = content.replace(regex.emptyLines, "");
-    return trimToMinimumIndent(clean);
+    if (isTest) debugger;
+    return getUnindentedInfo(clean);
   };
 
   const condWrap = (html, inline) => {
@@ -65,7 +68,7 @@ function parseCode(ctx) {
     const tag = inline ? "span" : "div";
     if (should) {
       const classes = inline ? config.wrapInlineClasses : config.wrapBlockClasses;
-      return `<${ tag } class="${ classes }">${ html }</${ tag }>`;
+      return `<${ tag } class="${ classes }">\n${ html }\n</${ tag }>`;
     } else {
       return html;
     } 
@@ -77,8 +80,10 @@ function parseCode(ctx) {
         return custom(content, ctx);
       } else {
         const method = inline ? "renderInline" : "render";
-        const html = md[method](correctIndent(content)).trim();
-        return condWrap(html, inline);
+        const { unindented, minIndent } = correctIndent(content);
+        const html = md[method](unindented);
+        const newHtml = condWrap(html, inline);
+        return indentExceptFirst(newHtml, minIndent);
       }
     }
   };
@@ -86,11 +91,12 @@ function parseCode(ctx) {
   const parseBlock = newParser(config.customParser);
   const parseInline = newParser(config.customParserInline, true);
   
-  const replacer = (parser) => {
+  const replacer = (parser, debug) => {
     return (match, body, index, full) => {
       const markupBefore = full.substring(0, index);
       const inComment = regex.unclosedHtmlComment.test(markupBefore);
       if (inComment) return match;
+      if (debug) debugger;
       return parser(body);
     }
   };
@@ -98,7 +104,7 @@ function parseCode(ctx) {
   const transform = (content) => {
     return content
       .replace(regex.markdownBlock, replacer(parseBlock))
-      .replace(regex.markdownInline, replacer(parseInline));
+      .replace(regex.markdownInline, replacer(parseInline, isTest));
   }
 
   if (id.match(config.isVueSfc)) {
@@ -126,7 +132,7 @@ function parseCode(ctx) {
  * Trims the indent off the markdown so it's as if it was not indented
  * since it's inside components (indented)
  */
-function trimToMinimumIndent(text) {
+function getUnindentedInfo(text) {
   const lines = text.split('\n');
   let minIndent = Infinity;
 
@@ -139,9 +145,13 @@ function trimToMinimumIndent(text) {
   }
 
   // Trim each line by the minimum indent
-  return lines
+  const unindented = lines
     .map(line => line.substring(minIndent))
     .join('\n');
+  return {
+    unindented,
+    minIndent
+  }
 }
 
 /**
@@ -189,4 +199,11 @@ function getTemplateIndices(code, regex) {
  */
 function newTagRegex(name) {
   return new RegExp(`<${ name }>([\\s\\S]*?)</${ name }>`, "gm");
+}
+
+function indentExceptFirst(text, indentCount) {
+  const indent = " ".repeat(indentCount);
+  const lines = text.split('\n');
+  const indentedLines = lines.slice(1).map(line => indent + line);
+  return [lines[0], ...indentedLines].join('\n');
 }

@@ -12,6 +12,7 @@ While primarily designed for .vue and .md files, this plugin can potentially wor
 - [Vite Setup](#vite-setup)
   - [Advanced Setup Example](#advanced-setup-example)
 - [Options](#options)
+- [Limitations](#limitations)
 - [Bugs, Issues and Changelog](#bugs-issues-and-changelog)
 
 ## Usage
@@ -169,6 +170,10 @@ const defaults = {
   isVueSfc: /\.vue$/,
 }
 ```
+
+## Limitations
+
+- When using with "unplugin-vue-markdown" this can't override how that plugin handles markdown. Any code that is indented more than 4 spaces with line-break before it will be converted to indented code block. To prevent this use `md.disable('code');` in markdownItSetup option in "unplugin-vue-markdown" plugin.
 
 ## Bugs, Issues and Changelog
 

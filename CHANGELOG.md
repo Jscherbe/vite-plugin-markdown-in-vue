@@ -1,5 +1,14 @@
 # Change Log
 
+## 0.0.8
+
+- Remove leading/trailing whitespace added by markdown renderer 
+  - Extra new line break after code will cause other code to be treated as indented code block in markdown pages that are post-processed by unplugin-vue-markdown
+  - This returns it to just the HTML and text content with no leading/trailing new lines / whitespace
+  - Add tests to check this is working
+- Add note about disabling indented code blocks in unplugin-vue-markdown
+- Test returning original indent (vs non indent html currently), this was unneeded so revert and stored test in /reference
+
 ## 0.0.7
 
 - Readme change
